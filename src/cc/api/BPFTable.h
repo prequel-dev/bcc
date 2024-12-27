@@ -300,13 +300,14 @@ class BPFHashTable : public BPFTableBase<KeyType, ValueType> {
     return value;
   }
 
-  std::vector<std::pair<KeyType, ValueType>> get_table_offline() {
+  std::vector<std::pair<KeyType, ValueType>> get_table_offline(const bool clear_table=false) {
     std::vector<std::pair<KeyType, ValueType>> res;
     KeyType cur;
+    KeyType prev;
     ValueType value;
-
+    
     StatusTuple r(0);
-
+    
     if (!this->first(&cur))
       return res;
 
@@ -315,10 +316,18 @@ class BPFHashTable : public BPFTableBase<KeyType, ValueType> {
       if (!r.ok())
         break;
       res.emplace_back(cur, value);
-      if (!this->next(&cur, &cur))
-        break;
+      prev = cur;
+      if (!this->next(&cur, &cur)) {
+        if(clear_table) {
+          this->remove_value(prev);
+        }
+        break;                    
+      }
+      if(clear_table) {
+        this->remove_value(prev);
+      }
     }
-
+    
     return res;
   }
 
