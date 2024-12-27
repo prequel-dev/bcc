@@ -134,10 +134,13 @@ StatusTuple BPF::init(const std::string& bpf_program,
 };
 
 BPF::~BPF() {
+// Tony -- no need to call detach_all on exit if we aren't keeping state
+#if 0
   auto res = detach_all();
   if (!res.ok())
     std::cerr << "Failed to detach all probes on destruction: " << std::endl
               << res.msg() << std::endl;
+#endif
   bcc_free_buildsymcache(bsymcache_);
   bsymcache_ = NULL;
 }
@@ -251,7 +254,8 @@ StatusTuple BPF::attach_kprobe(const std::string& kernel_func,
   open_probe_t p = {};
   p.perf_event_fd = res_fd;
   p.func = probe_func;
-  kprobes_[probe_event] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //kprobes_[probe_event] = std::move(p);
   return StatusTuple::OK();
 }
 
@@ -297,7 +301,8 @@ StatusTuple BPF::attach_uprobe(const std::string& binary_path,
   open_probe_t p = {};
   p.perf_event_fd = res_fd;
   p.func = probe_func;
-  uprobes_[probe_event] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //uprobes_[probe_event] = std::move(p);
   return StatusTuple::OK();
 }
 
@@ -384,7 +389,8 @@ StatusTuple BPF::attach_tracepoint(const std::string& tracepoint,
   open_probe_t p = {};
   p.perf_event_fd = res_fd;
   p.func = probe_func;
-  tracepoints_[tracepoint] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //tracepoints_[tracepoint] = std::move(p);
   return StatusTuple::OK();
 }
 
@@ -407,7 +413,8 @@ StatusTuple BPF::attach_raw_tracepoint(const std::string& tracepoint, const std:
   open_probe_t p = {};
   p.perf_event_fd = res_fd;
   p.func = probe_func;
-  raw_tracepoints_[tracepoint] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //raw_tracepoints_[tracepoint] = std::move(p);
   return StatusTuple::OK();
 }
 
@@ -447,7 +454,8 @@ StatusTuple BPF::attach_perf_event(uint32_t ev_type, uint32_t ev_config,
   open_probe_t p = {};
   p.func = probe_func;
   p.per_cpu_fd = fds;
-  perf_events_[ev_pair] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //perf_events_[ev_pair] = std::move(p);
   return StatusTuple::OK();
 }
 
@@ -488,7 +496,8 @@ StatusTuple BPF::attach_perf_event_raw(void* perf_event_attr,
   open_probe_t p = {};
   p.func = probe_func;
   p.per_cpu_fd = fds;
-  perf_events_[ev_pair] = std::move(p);
+  // Tony -- avoid unbounded memory growth and allow OS to clean up on shutdown
+  //perf_events_[ev_pair] = std::move(p);
   return StatusTuple::OK();
 }
 
