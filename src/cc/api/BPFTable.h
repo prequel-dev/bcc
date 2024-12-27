@@ -399,6 +399,7 @@ class BPFStackBuildIdTable : public BPFTableBase<int, stacktrace_buildid_t> {
                        bool check_debug_file_crc, void *bsymcache);
   ~BPFStackBuildIdTable() = default;
 
+  void clear_stack_id(int stack_id);
   void clear_table_non_atomic();
   std::vector<bpf_stack_build_id> get_stack_addr(int stack_id);
   std::vector<std::string> get_stack_symbol(int stack_id);
