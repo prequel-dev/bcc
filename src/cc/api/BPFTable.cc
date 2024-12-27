@@ -337,6 +337,25 @@ std::vector<std::string> BPFStackTable::get_stack_symbol(int stack_id,
   return res;
 }
 
+std::string BPFStackTable::get_addr_symbol(uintptr_t addr, int pid) {
+  if (pid < 0)
+    pid = -1;
+  if (pid_sym_.find(pid) == pid_sym_.end())
+    pid_sym_[pid] = bcc_symcache_new(pid, &symbol_option_);
+  void* cache = pid_sym_[pid];
+
+  bcc_symbol symbol;
+  std::string sym_str;
+  if (bcc_symcache_resolve(cache, addr, &symbol) != 0) {
+    sym_str = "[UNKNOWN]";
+  } else {
+    sym_str = symbol.demangle_name;
+    bcc_symbol_free_demangle_name(&symbol);
+  }
+
+  return sym_str;
+}
+
 BPFStackBuildIdTable::BPFStackBuildIdTable(const TableDesc& desc, bool use_debug_file,
                                            bool check_debug_file_crc,
                                            void *bsymcache)
