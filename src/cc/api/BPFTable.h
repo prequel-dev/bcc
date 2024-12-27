@@ -380,7 +380,7 @@ class BPFStackTable : public BPFTableBase<int, stacktrace_t> {
 
   void free_symcache(int pid);
   void clear_table_non_atomic();
-  std::vector<uintptr_t> get_stack_addr(int stack_id);
+  std::vector<uintptr_t> get_stack_addr(int stack_id, const bool clear=false);
   std::vector<std::string> get_stack_symbol(int stack_id, int pid);
 
  private:

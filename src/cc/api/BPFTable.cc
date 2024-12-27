@@ -288,7 +288,13 @@ void BPFStackTable::clear_table_non_atomic() {
   }
 }
 
-std::vector<uintptr_t> BPFStackTable::get_stack_addr(int stack_id) {
+void BPFStackTable::clear_stack_id(int stack_id) {
+  if(stack_id >= 0) {
+    remove(&stack_id);
+  }
+}
+
+std::vector<uintptr_t> BPFStackTable::get_stack_addr(int stack_id, const bool clear) {
   std::vector<uintptr_t> res;
   stacktrace_t stack;
   if (stack_id < 0)
@@ -297,6 +303,11 @@ std::vector<uintptr_t> BPFStackTable::get_stack_addr(int stack_id) {
     return res;
   for (int i = 0; (i < BPF_MAX_STACK_DEPTH) && (stack.ip[i] != 0); i++)
     res.push_back(stack.ip[i]);
+
+  if (clear) {
+    clear_stack_id(stack_id);
+  }
+
   return res;
 }
 
